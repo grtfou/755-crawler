@@ -50,23 +50,33 @@ class Crawler(object):
             print('Visit website fail')
 
     async def run(self, client, talk_id):
+        page_limit = 100
+
         payload = {
             'direction': 'PREV',
-            'limit': 100,
-            'postId': 6000,
+            'limit': page_limit,
+            'postId': 6000,  # test 6000
             'talkId': talk_id,
         }
 
         r = self.session.get(self.url, params=payload)
-        raw_data = r.json()
+        if r.status_code != 200:
+            # handle connection fail
+            sys.exit()
+        else:
+            raw_data = r.json()
 
-        count = 0
-        for i in range(100):
-            url = raw_data['posts'][i]['body'][0].get('image', '')
-            if url:
-                count += 1
-                file_date = url.split('/')[4]
-                self._download(url, "{}_{}.jpg".format(file_date, count))
+            # handle no post
+            if not raw_data['posts']:
+                sys.exit()
+
+            count = 0
+            for i in range(100):
+                url = raw_data['posts'][i]['body'][0].get('image', '')
+                if url:
+                    count += 1
+                    file_date = url.split('/')[4]
+                    self._download(url, "{}_{}.jpg".format(file_date, count))
 
 
 if __name__ == '__main__':

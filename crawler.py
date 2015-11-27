@@ -59,7 +59,7 @@ class Crawler(object):
         else:
             print('Visit website fail')
 
-    async def run(self, client, talk_id):
+    async def run(self, client, talk_id, stop_time=0):
         page_limit = 100
 
         payload = {
@@ -85,6 +85,10 @@ class Crawler(object):
 
             count = 0
             for i in range(100):
+                # if msg time too old, stop download
+                if int(raw_data['posts'][i]['time']) < stop_time:
+                    break
+
                 url = raw_data['posts'][i]['body'][0].get('image', '')
                 if url:
                     count += 1
@@ -94,8 +98,9 @@ class Crawler(object):
 
 if __name__ == '__main__':
     my_cwawler = Crawler()
+    stop_time = 1445687490
 
     loop = asyncio.get_event_loop()
     client = aiohttp.ClientSession(loop=loop)
-    loop.run_until_complete(my_cwawler.run(client, talk_id))
+    loop.run_until_complete(my_cwawler.run(client, talk_id, stop_time))
     client.close()

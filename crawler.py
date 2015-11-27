@@ -3,6 +3,7 @@
 """
 Main function
 """
+import os
 import re
 import random
 import sys
@@ -13,11 +14,14 @@ import requests
 
 from local_settings import talk_id
 
+
 class Crawler(object):
     """
     crawler for download 755 photos
     """
     url = 'http://7gogo.jp/api/talk/post/list'
+    img_path = 'images'
+
     def __init__(self):
         self.session = requests.session()
         pass
@@ -37,15 +41,21 @@ class Crawler(object):
             total_length = req.headers.get('content-length')
             dl_progress = 0
 
-            with open(filename, 'wb') as o_file:
-                for chunk in req.iter_content(1024):
-                    dl_progress += len(chunk)
-                    o_file.write(chunk)
+            output_path = "{}{}{}".format(self.img_path, os.sep, filename)
+            if not os.path.exists(output_path):
+                with open(output_path, 'wb') as o_file:
+                    for chunk in req.iter_content(1024):
+                        dl_progress += len(chunk)
+                        o_file.write(chunk)
 
-                    # Download progress report
-                    percent = 100.0 * dl_progress / int(total_length)
-                    sys.stdout.write("\r%2d%%" % percent)
-                    sys.stdout.flush()
+                        # Download progress report
+                        percent = 100.0 * dl_progress / int(total_length)
+                        sys.stdout.write("\r%2d%%" % percent)
+                        sys.stdout.flush()
+
+                print('')
+            else:
+                print('File exist')
         else:
             print('Visit website fail')
 
@@ -70,6 +80,9 @@ class Crawler(object):
             if not raw_data['posts']:
                 sys.exit()
 
+            if not os.path.isdir(self.img_path):
+                os.makedirs(self.img_path)
+
             count = 0
             for i in range(100):
                 url = raw_data['posts'][i]['body'][0].get('image', '')
@@ -86,4 +99,3 @@ if __name__ == '__main__':
     client = aiohttp.ClientSession(loop=loop)
     loop.run_until_complete(my_cwawler.run(client, talk_id))
     client.close()
-

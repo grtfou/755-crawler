@@ -27,7 +27,7 @@ class Crawler(object):
         self.session = requests.session()
         pass
 
-    def download_file(self, url, filename):
+    def download_file(self, url, filename, file_type):
         """
         Download photo.
 
@@ -40,7 +40,11 @@ class Crawler(object):
             total_length = req.headers.get('content-length')
             dl_progress = 0
 
-            output_path = "{}{}{}".format(self.img_path, os.sep, filename)
+            if file_type == 'images':
+                folder = self.img_path
+            else:
+                folder = self.video_path
+            output_path = "{}{}{}".format(folder, os.sep, filename)
             if not os.path.exists(output_path):
                 with open(output_path, 'wb') as o_file:
                     for chunk in req.iter_content(1024):
@@ -79,14 +83,17 @@ class Crawler(object):
             if not raw_data['posts']:
                 sys.exit()
 
+            # Created directories for store files
             if not os.path.isdir(self.img_path):
                 os.makedirs(self.img_path)
+            if not os.path.isdir(self.video_path):
+                os.makedirs(self.video_path)
 
             img_count = 1
             video_count = 1
             last_image_t = 0
             last_video_t = 0
-            for i in range(100):
+            for i in range(page_limit):
                 # if msg time too old, stop download
                 post_time = int(raw_data['posts'][i]['time'])
                 if int(post_time) < stop_time:
@@ -103,7 +110,7 @@ class Crawler(object):
                         img_count = 1
                         last_image_t = file_date
 
-                    self.download_file(url, "{}_{}.jpg".format(file_date, img_count))
+                    self.download_file(url, "{}_{}.jpg".format(file_date, img_count), 'images')
 
                 url = raw_data['posts'][i]['body'][0].get('movieUrlHq', '')
                 if url:
@@ -114,7 +121,8 @@ class Crawler(object):
                     else:
                         video_count = 1
                         last_video_t = file_date
-                    self.download_file(url, "{}_{}.mp4".format(file_date, video_count))
+
+                    self.download_file(url, "{}_{}.mp4".format(file_date, video_count), 'videos')
 
 
 if __name__ == '__main__':

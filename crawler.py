@@ -27,7 +27,7 @@ class Crawler(object):
         self.session = requests.session()
         pass
 
-    def get_image(self, url, filename):
+    def download_file(self, url, filename):
         """
         Download photo.
 
@@ -35,10 +35,6 @@ class Crawler(object):
             (String) url
             (String) file name (output)
         """
-        # urllib.urlretrieve(url, filename, self._report_hook)
-        print(filename)
-        return
-
         req = self.session.get(url, stream=True)
         if req.status_code == 200:
             total_length = req.headers.get('content-length')
@@ -52,13 +48,13 @@ class Crawler(object):
                         o_file.write(chunk)
 
                         # Download progress report
-                        percent = 100.0 * dl_progress / int(total_length)
-                        sys.stdout.write("\r%2d%%" % percent)
+                        percent = dl_progress / int(total_length)
+                        sys.stdout.write("\r{}: {:.2%}".format(filename, percent))
                         sys.stdout.flush()
 
                 print('')
             else:
-                print('File exist')
+                print('{}: File exist'.format(filename))
         else:
             print('Visit website fail')
 
@@ -86,8 +82,10 @@ class Crawler(object):
             if not os.path.isdir(self.img_path):
                 os.makedirs(self.img_path)
 
-            img_count = 0
-            video_count = 0
+            img_count = 1
+            video_count = 1
+            last_image_t = 0
+            last_video_t = 0
             for i in range(100):
                 # if msg time too old, stop download
                 post_time = int(raw_data['posts'][i]['time'])
@@ -96,16 +94,27 @@ class Crawler(object):
 
                 url = raw_data['posts'][i]['body'][0].get('image', '')
                 if url:
-                    img_count += 1
                     # file_date = url.split('/')[4]
                     file_date = datetime.utcfromtimestamp(post_time).strftime("%Y%m%d")
-                    self.get_image(url, "{}_{}.jpg".format(file_date, img_count))
+                    # handle duplication file
+                    if file_date == last_image_t:
+                        img_count += 1
+                    else:
+                        img_count = 1
+                        last_image_t = file_date
+
+                    self.download_file(url, "{}_{}.jpg".format(file_date, img_count))
 
                 url = raw_data['posts'][i]['body'][0].get('movieUrlHq', '')
                 if url:
-                    video_count += 1
                     file_date = datetime.utcfromtimestamp(post_time).strftime("%Y%m%d")
-                    self.get_image(url, "{}_{}.mp4".format(file_date, img_count))
+                    # handle duplication file
+                    if file_date == last_video_t:
+                        video_count += 1
+                    else:
+                        video_count = 1
+                        last_video_t = file_date
+                    self.download_file(url, "{}_{}.mp4".format(file_date, video_count))
 
 
 if __name__ == '__main__':

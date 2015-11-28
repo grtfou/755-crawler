@@ -59,3 +59,5 @@ target/
 
 # configure
 local_settings.py
+images/
+videos/

@@ -5,8 +5,8 @@ Main function
 """
 import os
 import re
-import random
 import sys
+from datetime import datetime
 
 import aiohttp
 import asyncio
@@ -17,24 +17,27 @@ from local_settings import talk_id
 
 class Crawler(object):
     """
-    crawler for download 755 photos
+    Crawler for download 755 photos.
     """
     url = 'http://7gogo.jp/api/talk/post/list'
     img_path = 'images'
+    video_path = 'videos'
 
     def __init__(self):
         self.session = requests.session()
         pass
 
-    def _download(self, url, filename):
+    def get_image(self, url, filename):
         """
-        Download photo
+        Download photo.
 
         Args:
             (String) url
             (String) file name (output)
         """
         # urllib.urlretrieve(url, filename, self._report_hook)
+        print(filename)
+        return
 
         req = self.session.get(url, stream=True)
         if req.status_code == 200:
@@ -83,17 +86,26 @@ class Crawler(object):
             if not os.path.isdir(self.img_path):
                 os.makedirs(self.img_path)
 
-            count = 0
+            img_count = 0
+            video_count = 0
             for i in range(100):
                 # if msg time too old, stop download
-                if int(raw_data['posts'][i]['time']) < stop_time:
+                post_time = int(raw_data['posts'][i]['time'])
+                if int(post_time) < stop_time:
                     break
 
                 url = raw_data['posts'][i]['body'][0].get('image', '')
                 if url:
-                    count += 1
-                    file_date = url.split('/')[4]
-                    self._download(url, "{}_{}.jpg".format(file_date, count))
+                    img_count += 1
+                    # file_date = url.split('/')[4]
+                    file_date = datetime.utcfromtimestamp(post_time).strftime("%Y%m%d")
+                    self.get_image(url, "{}_{}.jpg".format(file_date, img_count))
+
+                url = raw_data['posts'][i]['body'][0].get('movieUrlHq', '')
+                if url:
+                    video_count += 1
+                    file_date = datetime.utcfromtimestamp(post_time).strftime("%Y%m%d")
+                    self.get_image(url, "{}_{}.mp4".format(file_date, img_count))
 
 
 if __name__ == '__main__':
@@ -101,6 +113,5 @@ if __name__ == '__main__':
     stop_time = 1445687490
 
     loop = asyncio.get_event_loop()
-    client = aiohttp.ClientSession(loop=loop)
-    loop.run_until_complete(my_cwawler.run(client, talk_id, stop_time))
-    client.close()
+    with aiohttp.ClientSession(loop=loop) as client:
+        loop.run_until_complete(my_cwawler.run(client, talk_id, stop_time))

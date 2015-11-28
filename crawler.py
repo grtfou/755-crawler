@@ -65,64 +65,66 @@ class Crawler(object):
     async def run(self, client, talk_id, stop_time=0):
         page_limit = 100
 
-        payload = {
-            'direction': 'PREV',
-            'limit': page_limit,
-            'postId': 6000,  # test 6000
-            'talkId': talk_id,
-        }
+        for post_rec in range(0, 99999999, 100):
+            payload = {
+                'direction': 'PREV',
+                'limit': page_limit,
+                'postId': post_rec,  # test 6000 (photos and videos)
+                'talkId': talk_id,
+            }
 
-        r = self.session.get(self.url, params=payload)
-        if r.status_code != 200:
-            # handle connection fail
-            sys.exit()
-        else:
-            raw_data = r.json()
-
-            # handle no post
-            if not raw_data['posts']:
+            r = self.session.get(self.url, params=payload)
+            if r.status_code != 200:
+                # handle connection fail
                 sys.exit()
+            else:
+                raw_data = r.json()
 
-            # Created directories for store files
-            if not os.path.isdir(self.img_path):
-                os.makedirs(self.img_path)
-            if not os.path.isdir(self.video_path):
-                os.makedirs(self.video_path)
+                # handle no post
+                if not raw_data['posts']:
+                    print('Finished !')
+                    sys.exit()
 
-            img_count = 1
-            video_count = 1
-            last_image_t = 0
-            last_video_t = 0
-            for i in range(page_limit):
-                # if msg time too old, stop download
-                post_time = int(raw_data['posts'][i]['time'])
-                if int(post_time) < stop_time:
-                    break
+                # Created directories for store files
+                if not os.path.isdir(self.img_path):
+                    os.makedirs(self.img_path)
+                if not os.path.isdir(self.video_path):
+                    os.makedirs(self.video_path)
 
-                url = raw_data['posts'][i]['body'][0].get('image', '')
-                if url:
-                    # file_date = url.split('/')[4]
-                    file_date = datetime.utcfromtimestamp(post_time).strftime("%Y%m%d")
-                    # handle duplication file
-                    if file_date == last_image_t:
-                        img_count += 1
-                    else:
-                        img_count = 1
-                        last_image_t = file_date
+                img_count = 1
+                video_count = 1
+                last_image_t = 0
+                last_video_t = 0
+                for i in range(page_limit):
+                    # if msg time too old, stop download
+                    post_time = int(raw_data['posts'][i]['time'])
+                    if int(post_time) < stop_time:
+                        break
 
-                    self.download_file(url, "{}_{}.jpg".format(file_date, img_count), 'images')
+                    url = raw_data['posts'][i]['body'][0].get('image', '')
+                    if url:
+                        # file_date = url.split('/')[4]
+                        file_date = datetime.utcfromtimestamp(post_time).strftime("%Y%m%d")
+                        # handle duplication file
+                        if file_date == last_image_t:
+                            img_count += 1
+                        else:
+                            img_count = 1
+                            last_image_t = file_date
 
-                url = raw_data['posts'][i]['body'][0].get('movieUrlHq', '')
-                if url:
-                    file_date = datetime.utcfromtimestamp(post_time).strftime("%Y%m%d")
-                    # handle duplication file
-                    if file_date == last_video_t:
-                        video_count += 1
-                    else:
-                        video_count = 1
-                        last_video_t = file_date
+                        self.download_file(url, "{}_{}.jpg".format(file_date, img_count), 'images')
 
-                    self.download_file(url, "{}_{}.mp4".format(file_date, video_count), 'videos')
+                    url = raw_data['posts'][i]['body'][0].get('movieUrlHq', '')
+                    if url:
+                        file_date = datetime.utcfromtimestamp(post_time).strftime("%Y%m%d")
+                        # handle duplication file
+                        if file_date == last_video_t:
+                            video_count += 1
+                        else:
+                            video_count = 1
+                            last_video_t = file_date
+
+                        self.download_file(url, "{}_{}.mp4".format(file_date, video_count), 'videos')
 
 
 if __name__ == '__main__':

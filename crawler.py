@@ -110,7 +110,7 @@ class Crawler(object):
                     url = raw_data['posts'][i]['body'][0].get('image', '')
                     if url:
                         # file_date = url.split('/')[4]
-                        file_date = datetime.utcfromtimestamp(post_time).strftime("%Y%m%d%")
+                        file_date = datetime.utcfromtimestamp(post_time).strftime("%y%m%d%H%M%S")
                         # handle duplication file
                         if file_date == last_image_t:
                             img_count += 1
@@ -122,7 +122,7 @@ class Crawler(object):
 
                     url = raw_data['posts'][i]['body'][0].get('movieUrlHq', '')
                     if url:
-                        file_date = datetime.utcfromtimestamp(post_time).strftime("%Y%m%d")
+                        file_date = datetime.utcfromtimestamp(post_time).strftime("%y%m%d%H%M%S")
                         # handle duplication file
                         if file_date == last_video_t:
                             video_count += 1

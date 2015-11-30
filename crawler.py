@@ -65,9 +65,13 @@ class Crawler(object):
     async def run(self, client, talk_id, stop_time=0):
         page_limit = 100
 
-        for post_rec in range(0, 99999999, 100):
+        img_count = 1
+        video_count = 1
+        last_image_t = 0
+        last_video_t = 0
+        for post_rec in range(1, 99999999, 100):
             payload = {
-                'direction': 'PREV',
+                'direction': 'NEXT',
                 'limit': page_limit,
                 'postId': post_rec,  # test 6000 (photos and videos)
                 'talkId': talk_id,
@@ -91,20 +95,22 @@ class Crawler(object):
                 if not os.path.isdir(self.video_path):
                     os.makedirs(self.video_path)
 
-                img_count = 1
-                video_count = 1
-                last_image_t = 0
-                last_video_t = 0
                 for i in range(page_limit):
+                    # handle one page doesn't have 100 posts
+                    try:
+                        post_time = int(raw_data['posts'][i]['time'])
+                    except IndexError:
+                        print('Finished !')
+                        sys.exit()
+
                     # if msg time too old, stop download
-                    post_time = int(raw_data['posts'][i]['time'])
                     if int(post_time) < stop_time:
                         break
 
                     url = raw_data['posts'][i]['body'][0].get('image', '')
                     if url:
                         # file_date = url.split('/')[4]
-                        file_date = datetime.utcfromtimestamp(post_time).strftime("%Y%m%d")
+                        file_date = datetime.utcfromtimestamp(post_time).strftime("%y%m%d%H%M%S")
                         # handle duplication file
                         if file_date == last_image_t:
                             img_count += 1
@@ -116,7 +122,7 @@ class Crawler(object):
 
                     url = raw_data['posts'][i]['body'][0].get('movieUrlHq', '')
                     if url:
-                        file_date = datetime.utcfromtimestamp(post_time).strftime("%Y%m%d")
+                        file_date = datetime.utcfromtimestamp(post_time).strftime("%y%m%d%H%M%S")
                         # handle duplication file
                         if file_date == last_video_t:
                             video_count += 1
@@ -129,7 +135,7 @@ class Crawler(object):
 
 if __name__ == '__main__':
     my_cwawler = Crawler()
-    stop_time = 1445687490
+    stop_time = 0
 
     loop = asyncio.get_event_loop()
     with aiohttp.ClientSession(loop=loop) as client:

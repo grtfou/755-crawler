@@ -10,7 +10,7 @@ from local_settings import url
 
 
 def __parser(raw_data):
-    regex = re.compile(r'talkId\s*:')
+    regex = re.compile(r'talkId\s*:(.*)')
     result = regex.search(raw_data)
     print(result.group(0))
 

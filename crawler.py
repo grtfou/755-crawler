@@ -12,8 +12,7 @@ import aiohttp
 import asyncio
 import requests
 
-from local_settings import talk_id
-
+from talk_id import get_talk_id
 
 class Crawler(object):
     """
@@ -136,6 +135,8 @@ class Crawler(object):
 if __name__ == '__main__':
     my_cwawler = Crawler()
     stop_time = 0
+    main_url = sys.argv[1]
+    talk_id = get_talk_id(main_url)
 
     loop = asyncio.get_event_loop()
     with aiohttp.ClientSession(loop=loop) as client:

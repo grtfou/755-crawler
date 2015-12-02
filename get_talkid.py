@@ -3,24 +3,27 @@
 """
 Get talkID from main page
 """
+import sys
 import re
 import requests
 
-from local_settings import url
-
 
 def __parser(raw_data):
-    regex = re.compile(r'talkId\s*:(.*)')
+    regex = re.compile(r'talkId\s*:\s*\"([\w=-]*)\",')
     result = regex.search(raw_data)
-    print(result.group(0))
-
+    return result.group(1)
 
 def get_talk_id(url):
     session = requests.session()
     repo = session.get(url)
 
     if repo.status_code == 200:
-        __parser(repo.text)
+        talk_id = __parser(repo.text)
+        return talk_id
 
+    return None
+
+# For unit test
 if __name__ == '__main__':
+    url = sys.argv[1]
     get_talk_id(url)

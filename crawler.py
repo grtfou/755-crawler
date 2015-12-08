@@ -6,6 +6,7 @@ Main function
 import os
 import re
 import sys
+import argparse
 from datetime import datetime
 
 import aiohttp
@@ -13,6 +14,7 @@ import asyncio
 import requests
 
 from talk_id import get_talk_id
+
 
 class Crawler(object):
     """
@@ -26,7 +28,7 @@ class Crawler(object):
         self.session = requests.session()
         pass
 
-    def download_file(self, url, filename, file_type):
+    def download_file(self, url, filename, dest_path):
         """
         Download photo.
 
@@ -39,11 +41,7 @@ class Crawler(object):
             total_length = req.headers.get('content-length')
             dl_progress = 0
 
-            if file_type == 'images':
-                folder = self.img_path
-            else:
-                folder = self.video_path
-            output_path = "{}{}{}".format(folder, os.sep, filename)
+            output_path = "{}{}{}".format(dest_path, os.sep, filename)
             if not os.path.exists(output_path):
                 with open(output_path, 'wb') as o_file:
                     for chunk in req.iter_content(1024):
@@ -79,6 +77,7 @@ class Crawler(object):
             r = self.session.get(self.url, params=payload)
             if r.status_code != 200:
                 # handle connection fail
+                print('Connection fail')
                 sys.exit()
             else:
                 raw_data = r.json()
@@ -89,10 +88,12 @@ class Crawler(object):
                     sys.exit()
 
                 # Created directories for store files
-                if not os.path.isdir(self.img_path):
-                    os.makedirs(self.img_path)
-                if not os.path.isdir(self.video_path):
-                    os.makedirs(self.video_path)
+                dest_img_path = 'downloads{}{}{}'.format(os.sep, talk_id, os.sep, self.img_path)
+                dest_video_path = 'downloads{}{}{}'.format(os.sep, talk_id, os.sep, self.video_path)
+                if not os.path.isdir(dest_img_path):
+                    os.makedirs(dest_img_path)
+                if not os.path.isdir(dest_video_path):
+                    os.makedirs(dest_video_path)
 
                 for i in range(page_limit):
                     # handle one page doesn't have 100 posts
@@ -117,7 +118,7 @@ class Crawler(object):
                             img_count = 1
                             last_image_t = file_date
 
-                        self.download_file(url, "{}_{}.jpg".format(file_date, img_count), 'images')
+                        self.download_file(url, "{}_{}.jpg".format(file_date, img_count), dest_img_path)
 
                     url = raw_data['posts'][i]['body'][0].get('movieUrlHq', '')
                     if url:
@@ -129,15 +130,23 @@ class Crawler(object):
                             video_count = 1
                             last_video_t = file_date
 
-                        self.download_file(url, "{}_{}.mp4".format(file_date, video_count), 'videos')
+                        self.download_file(url, "{}_{}.mp4".format(file_date, video_count), dest_video_path)
 
 
 if __name__ == '__main__':
-    my_cwawler = Crawler()
-    stop_time = 0
-    main_url = sys.argv[1]
-    talk_id = get_talk_id(main_url)
+    parser = argparse.ArgumentParser(description='Download 755 photos and videos.')
+    parser.add_argument('url', type=str, nargs='?',
+                        help='Target Url: ex. http://7gogo.jp/talks/examples')
+    parser.add_argument('stop_time', type=int, nargs='?', default=0,
+                        help='Epoch Time: ex. 1412776303')
+    args = parser.parse_args()
 
-    loop = asyncio.get_event_loop()
-    with aiohttp.ClientSession(loop=loop) as client:
-        loop.run_until_complete(my_cwawler.run(client, talk_id, stop_time))
+    if args.url and args.stop_time >= 0:
+        my_cwawler = Crawler()
+        talk_id = get_talk_id(args.url)
+
+        loop = asyncio.get_event_loop()
+        with aiohttp.ClientSession(loop=loop) as client:
+            loop.run_until_complete(my_cwawler.run(client, talk_id, args.stop_time))
+    else:
+        parser.print_help()

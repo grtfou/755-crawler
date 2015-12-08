@@ -6,6 +6,7 @@ Main function
 import os
 import re
 import sys
+import argparse
 from datetime import datetime
 
 import aiohttp
@@ -13,6 +14,7 @@ import asyncio
 import requests
 
 from talk_id import get_talk_id
+
 
 class Crawler(object):
     """
@@ -75,6 +77,7 @@ class Crawler(object):
             r = self.session.get(self.url, params=payload)
             if r.status_code != 200:
                 # handle connection fail
+                print('Connection fail')
                 sys.exit()
             else:
                 raw_data = r.json()
@@ -131,11 +134,19 @@ class Crawler(object):
 
 
 if __name__ == '__main__':
-    my_cwawler = Crawler()
-    stop_time = 0
-    main_url = sys.argv[1]
-    talk_id = get_talk_id(main_url)
+    parser = argparse.ArgumentParser(description='Download 755 photos and videos.')
+    parser.add_argument('url', type=str, nargs='?',
+                        help='Target Url: ex. http://7gogo.jp/talks/examples')
+    parser.add_argument('stop_time', type=int, nargs='?', default=0,
+                        help='Epoch Time: ex. 1412776303')
+    args = parser.parse_args()
 
-    loop = asyncio.get_event_loop()
-    with aiohttp.ClientSession(loop=loop) as client:
-        loop.run_until_complete(my_cwawler.run(client, talk_id, stop_time))
+    if args.url and args.stop_time >= 0:
+        my_cwawler = Crawler()
+        talk_id = get_talk_id(args.url)
+
+        loop = asyncio.get_event_loop()
+        with aiohttp.ClientSession(loop=loop) as client:
+            loop.run_until_complete(my_cwawler.run(client, talk_id, args.stop_time))
+    else:
+        parser.print_help()

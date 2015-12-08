@@ -26,7 +26,7 @@ class Crawler(object):
         self.session = requests.session()
         pass
 
-    def download_file(self, url, filename, file_type):
+    def download_file(self, url, filename, dest_path):
         """
         Download photo.
 
@@ -39,11 +39,7 @@ class Crawler(object):
             total_length = req.headers.get('content-length')
             dl_progress = 0
 
-            if file_type == 'images':
-                folder = self.img_path
-            else:
-                folder = self.video_path
-            output_path = "{}{}{}".format(folder, os.sep, filename)
+            output_path = "{}{}{}".format(dest_path, os.sep, filename)
             if not os.path.exists(output_path):
                 with open(output_path, 'wb') as o_file:
                     for chunk in req.iter_content(1024):
@@ -89,10 +85,12 @@ class Crawler(object):
                     sys.exit()
 
                 # Created directories for store files
-                if not os.path.isdir(self.img_path):
-                    os.makedirs(self.img_path)
-                if not os.path.isdir(self.video_path):
-                    os.makedirs(self.video_path)
+                dest_img_path = 'downloads{}{}{}'.format(os.sep, talk_id, os.sep, self.img_path)
+                dest_video_path = 'downloads{}{}{}'.format(os.sep, talk_id, os.sep, self.video_path)
+                if not os.path.isdir(dest_img_path):
+                    os.makedirs(dest_img_path)
+                if not os.path.isdir(dest_video_path):
+                    os.makedirs(dest_video_path)
 
                 for i in range(page_limit):
                     # handle one page doesn't have 100 posts
@@ -117,7 +115,7 @@ class Crawler(object):
                             img_count = 1
                             last_image_t = file_date
 
-                        self.download_file(url, "{}_{}.jpg".format(file_date, img_count), 'images')
+                        self.download_file(url, "{}_{}.jpg".format(file_date, img_count), dest_img_path)
 
                     url = raw_data['posts'][i]['body'][0].get('movieUrlHq', '')
                     if url:
@@ -129,7 +127,7 @@ class Crawler(object):
                             video_count = 1
                             last_video_t = file_date
 
-                        self.download_file(url, "{}_{}.mp4".format(file_date, video_count), 'videos')
+                        self.download_file(url, "{}_{}.mp4".format(file_date, video_count), dest_video_path)
 
 
 if __name__ == '__main__':

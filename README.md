@@ -13,7 +13,8 @@ Download the source code and uncompress
 ```
 $ pip install -r requirements.txt
 $ python crawler.py [url] [stop time (epoch time)]
-# example
+
+# for example
 $ python crawler.py http://7gogo.jp/talks/YtykfykuJfMT 1412776303
 ```
 #### [GUI]

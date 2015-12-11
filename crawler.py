@@ -6,6 +6,7 @@ Main function
 import os
 import re
 import sys
+import time
 import argparse
 from datetime import datetime
 
@@ -137,16 +138,22 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Download 755 photos and videos.')
     parser.add_argument('url', type=str, nargs='?',
                         help='Target Url: ex. http://7gogo.jp/talks/examples')
-    parser.add_argument('stop_time', type=int, nargs='?', default=0,
-                        help='Epoch Time: ex. 1412776303')
+    parser.add_argument('stop_time', type=str, nargs='?', default=None,
+                        help='Date (yy/mm/dd): ex. 141105')
     args = parser.parse_args()
 
-    if args.url and args.stop_time >= 0:
+    if args.url and args.stop_time:
+        try:
+            args.stop_time = time.mktime(time.strptime(args.stop_time, "%y%m%d"))
+        except ValueError:
+            parser.print_help()
+            sys.exit()
+
         my_cwawler = Crawler()
         talk_id = get_talk_id(args.url)
 
         loop = asyncio.get_event_loop()
         with aiohttp.ClientSession(loop=loop) as client:
             loop.run_until_complete(my_cwawler.run(client, talk_id, args.stop_time))
-    else:
-        parser.print_help()
+
+    parser.print_help()

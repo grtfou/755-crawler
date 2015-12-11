@@ -26,8 +26,8 @@ def get_talk_id(url):
 
     if repo.status_code == 200:
         talk_id = __parser_talk_id(repo.text)
-        name = __parser_name(repo.text)
-        return talk_id, name
+        username = __parser_name(repo.text)
+        return talk_id, username
 
     return None
 

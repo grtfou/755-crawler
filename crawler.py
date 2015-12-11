@@ -6,6 +6,7 @@ Main function
 import os
 import re
 import sys
+import time
 import argparse
 from datetime import datetime
 
@@ -59,7 +60,7 @@ class Crawler(object):
         else:
             print('Visit website fail')
 
-    async def run(self, client, talk_id, stop_time=0):
+    async def run(self, client, talk_id, username, stop_time=0):
         page_limit = 100
 
         img_count = 1
@@ -88,8 +89,10 @@ class Crawler(object):
                     sys.exit()
 
                 # Created directories for store files
-                dest_img_path = 'downloads{}{}{}'.format(os.sep, talk_id, os.sep, self.img_path)
-                dest_video_path = 'downloads{}{}{}'.format(os.sep, talk_id, os.sep, self.video_path)
+                dest_img_path = 'downloads{}{}{}'.format(
+                    os.sep, username, os.sep, self.img_path)
+                dest_video_path = 'downloads{}{}{}'.format(
+                    os.sep, username, os.sep, self.video_path)
                 if not os.path.isdir(dest_img_path):
                     os.makedirs(dest_img_path)
                 if not os.path.isdir(dest_video_path):
@@ -110,7 +113,8 @@ class Crawler(object):
                     url = raw_data['posts'][i]['body'][0].get('image', '')
                     if url:
                         # file_date = url.split('/')[4]
-                        file_date = datetime.utcfromtimestamp(post_time).strftime("%y%m%d%H%M%S")
+                        file_date = datetime.utcfromtimestamp(post_time
+                                                              ).strftime("%y%m%d%H%M%S")
                         # handle duplication file
                         if file_date == last_image_t:
                             img_count += 1
@@ -118,11 +122,13 @@ class Crawler(object):
                             img_count = 1
                             last_image_t = file_date
 
-                        self.download_file(url, "{}_{}.jpg".format(file_date, img_count), dest_img_path)
+                        self.download_file(
+                            url, "{}_{}.jpg".format(file_date, img_count), dest_img_path)
 
                     url = raw_data['posts'][i]['body'][0].get('movieUrlHq', '')
                     if url:
-                        file_date = datetime.utcfromtimestamp(post_time).strftime("%y%m%d%H%M%S")
+                        file_date = datetime.utcfromtimestamp(post_time
+                                                              ).strftime("%y%m%d%H%M%S")
                         # handle duplication file
                         if file_date == last_video_t:
                             video_count += 1
@@ -130,23 +136,31 @@ class Crawler(object):
                             video_count = 1
                             last_video_t = file_date
 
-                        self.download_file(url, "{}_{}.mp4".format(file_date, video_count), dest_video_path)
+                        self.download_file(
+                            url, "{}_{}.mp4".format(file_date, video_count), dest_video_path)
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Download 755 photos and videos.')
+    parser = argparse.ArgumentParser(description='Download 755 photos + videos.')
     parser.add_argument('url', type=str, nargs='?',
                         help='Target Url: ex. http://7gogo.jp/talks/examples')
-    parser.add_argument('stop_time', type=int, nargs='?', default=0,
-                        help='Epoch Time: ex. 1412776303')
+    parser.add_argument('stop_time', type=str, nargs='?', default=None,
+                        help='Date (yy/mm/dd): ex. 141105')
     args = parser.parse_args()
 
-    if args.url and args.stop_time >= 0:
+    if args.url and args.stop_time:
+        try:
+            args.stop_time = time.mktime(time.strptime(args.stop_time, "%y%m%d"))
+        except ValueError:
+            parser.print_help()
+            sys.exit()
+
         my_cwawler = Crawler()
-        talk_id = get_talk_id(args.url)
+        talk_id, username = get_talk_id(args.url)
 
         loop = asyncio.get_event_loop()
         with aiohttp.ClientSession(loop=loop) as client:
-            loop.run_until_complete(my_cwawler.run(client, talk_id, args.stop_time))
-    else:
-        parser.print_help()
+            loop.run_until_complete(my_cwawler.run(
+                client, talk_id, username, args.stop_time))
+
+    parser.print_help()

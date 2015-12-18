@@ -78,15 +78,15 @@ class Crawler(object):
             r = self.session.get(self.url, params=payload)
             if r.status_code != 200:
                 # handle connection fail
-                print('Connection fail')
-                sys.exit()
+                print('Error: Connection fail')
+                return
             else:
                 raw_data = r.json()
 
                 # handle no post
                 if not raw_data['posts']:
                     print('Finished !')
-                    sys.exit()
+                    return
 
                 # Created directories for store files
                 dest_img_path = 'downloads{}{}{}'.format(
@@ -104,7 +104,7 @@ class Crawler(object):
                         post_time = int(raw_data['posts'][i]['time'])
                     except IndexError:
                         print('Finished !')
-                        sys.exit()
+                        return
 
                     # if msg time too old, stop download
                     if int(post_time) < stop_time:
@@ -153,6 +153,7 @@ if __name__ == '__main__':
             args.stop_time = time.mktime(time.strptime(args.stop_time, "%y%m%d"))
         except ValueError:
             parser.print_help()
+            print('Error: Stop time format')
             sys.exit()
 
         my_cwawler = Crawler()
@@ -162,5 +163,5 @@ if __name__ == '__main__':
         with aiohttp.ClientSession(loop=loop) as client:
             loop.run_until_complete(my_cwawler.run(
                 client, talk_id, username, args.stop_time))
-
-    parser.print_help()
+    else:
+        parser.print_help()

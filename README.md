@@ -12,10 +12,10 @@ A web crawler that visit [755 website][1] for download photo and video.
 Download the source code and uncompress
 ```
 $ pip install -r requirements.txt
-$ python crawler.py [url] [stop time (epoch time)]
+$ python crawler.py [url] [stop time (yy/mm/dd)]
 
 # for example
-$ python crawler.py http://7gogo.jp/talks/YtykfykuJfMT 1412776303
+$ python crawler.py http://7gogo.jp/talks/YtykfykuJfMT 141105
 ```
 #### [GUI]
 TODO

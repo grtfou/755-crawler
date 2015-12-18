@@ -3,7 +3,6 @@
 """
 Get talkID from main page
 """
-import sys
 import re
 import requests
 
@@ -30,8 +29,3 @@ def get_talk_id(url):
         return talk_id, username
 
     return None
-
-# For unit test
-if __name__ == '__main__':
-    url = sys.argv[1]
-    print(get_talk_id(url))

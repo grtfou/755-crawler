@@ -78,7 +78,7 @@ class Crawler(object):
             r = self.session.get(self.url, params=payload)
             if r.status_code != 200:
                 # handle connection fail
-                print('Connection fail')
+                print('Error: Connection fail')
                 return
             else:
                 raw_data = r.json()
@@ -153,6 +153,7 @@ if __name__ == '__main__':
             args.stop_time = time.mktime(time.strptime(args.stop_time, "%y%m%d"))
         except ValueError:
             parser.print_help()
+            print('Error: Stop time format')
             sys.exit()
 
         my_cwawler = Crawler()
@@ -162,5 +163,5 @@ if __name__ == '__main__':
         with aiohttp.ClientSession(loop=loop) as client:
             loop.run_until_complete(my_cwawler.run(
                 client, talk_id, username, args.stop_time))
-
-    parser.print_help()
+    else:
+        parser.print_help()

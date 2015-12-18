@@ -20,7 +20,7 @@ def test_talk_id():
     for url in urls:
         result = get_talk_id(url)
         print(result)
-        assert result is not None
+        assert result != (None, None)
         if result:
             assert result[0][::-1][:2] == '=='
             assert result[1] != ''
@@ -30,4 +30,4 @@ def test_error_talk_id():
     url = "http://7gogo.jp/talks/error"
 
     result = get_talk_id(url)
-    assert result is None
+    assert result == (None, None)

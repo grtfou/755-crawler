@@ -79,14 +79,14 @@ class Crawler(object):
             if r.status_code != 200:
                 # handle connection fail
                 print('Connection fail')
-                sys.exit()
+                return
             else:
                 raw_data = r.json()
 
                 # handle no post
                 if not raw_data['posts']:
                     print('Finished !')
-                    sys.exit()
+                    return
 
                 # Created directories for store files
                 dest_img_path = 'downloads{}{}{}'.format(
@@ -104,7 +104,7 @@ class Crawler(object):
                         post_time = int(raw_data['posts'][i]['time'])
                     except IndexError:
                         print('Finished !')
-                        sys.exit()
+                        return
 
                     # if msg time too old, stop download
                     if int(post_time) < stop_time:

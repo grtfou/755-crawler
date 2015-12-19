@@ -4,7 +4,6 @@
 Main function
 """
 import os
-import re
 import sys
 import time
 import argparse
@@ -60,7 +59,7 @@ class Crawler(object):
         else:
             print('Visit website fail')
 
-    async def run(self, client, talk_id, username, stop_time=0):
+    def run(self, client, talk_id, username, stop_time=0):
         page_limit = 100
 
         img_count = 1

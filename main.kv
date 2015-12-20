@@ -1,0 +1,35 @@
+<CrawlerWidget>:
+    FloatLayout:
+        canvas.before:
+            Color:
+                rgba: 192,192,192,0.3
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Button:
+            id: btn_start
+            text: 'Start'
+            size_hint: None, None
+            pos_hint: {'center_x':.8, 'center_y': .2}
+            on_press: root.check_status(url.text, stop_date.text)
+
+        Label:
+            id: label_1
+            text: '755 URL'
+            size_hint: None, None
+            pos_hint: {'center_x':.2, 'center_y': .8}
+        Label:
+            id: label_2
+            text: 'End Date'
+            size_hint: None, None
+            pos_hint: {'center_x':.2, 'center_y': .6}
+        TextInput:
+            id: url
+            text: 'http://7gogo.jp/talks/YtykfykuJfMT'
+            size_hint: .25, .05
+            pos_hint: {'center_x':.38, 'center_y': .8}
+        TextInput:
+            id: stop_date
+            text: '141011'
+            size_hint: .25, .05
+            pos_hint: {'center_x':.38, 'center_y': .6}

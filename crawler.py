@@ -59,6 +59,7 @@ class Crawler(object):
         else:
             print('Visit website fail')
 
+    @asyncio.coroutine
     def run(self, client, talk_id, username, stop_time=0):
         page_limit = 100
 

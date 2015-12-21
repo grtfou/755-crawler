@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import time
 
 import aiohttp
@@ -37,5 +39,5 @@ class MainApp(App):
         return CrawlerWidget()
 
 if __name__ == '__main__':
-    Window.size = (700, 600)
+    Window.size = (900, 600)
     MainApp().run()

@@ -67,13 +67,15 @@ class Crawler(object):
         video_count = 1
         last_image_t = 0
         last_video_t = 0
-        for post_rec in range(1, 99999999, 100):
+        post_rec = 1
+        while True:
             payload = {
                 'direction': 'NEXT',
                 'limit': page_limit,
-                'postId': post_rec,  # test 6000 (photos and videos)
+                'postId': post_rec,
                 'talkId': talk_id,
             }
+            post_rec += page_limit
 
             r = self.session.get(self.url, params=payload)
             if r.status_code != 200:
@@ -89,9 +91,9 @@ class Crawler(object):
                     return
 
                 # Created directories for store files
-                dest_img_path = 'downloads{}{}{}'.format(
+                dest_img_path = 'downloads{}{}{}{}'.format(
                     os.sep, username, os.sep, self.img_path)
-                dest_video_path = 'downloads{}{}{}'.format(
+                dest_video_path = 'downloads{}{}{}{}'.format(
                     os.sep, username, os.sep, self.video_path)
                 if not os.path.isdir(dest_img_path):
                     os.makedirs(dest_img_path)
@@ -153,7 +155,7 @@ if __name__ == '__main__':
             args.stop_time = time.mktime(time.strptime(args.stop_time, "%y%m%d"))
         except ValueError:
             parser.print_help()
-            print('Error: Stop time format')
+            print('Error: Stop Date format is wrong')
             sys.exit()
 
         my_cwawler = Crawler()

@@ -72,10 +72,10 @@ class Crawler(object):
             payload = {
                 'direction': 'NEXT',
                 'limit': page_limit,
-                'postId': post_rec,
+                'postId': post_rec,  # test 6000 (photos and videos)
                 'talkId': talk_id,
             }
-            post_rec += page_limit
+            post_rec += 100
 
             r = self.session.get(self.url, params=payload)
             if r.status_code != 200:

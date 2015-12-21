@@ -1,11 +1,10 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import time
 
 import aiohttp
 import asyncio
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
+from kivy.core.window import Window
 
 from crawler import Crawler
 from talk_id import get_talk_id
@@ -38,4 +37,5 @@ class MainApp(App):
         return CrawlerWidget()
 
 if __name__ == '__main__':
+    Window.size = (700, 600)
     MainApp().run()

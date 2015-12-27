@@ -12,12 +12,7 @@
             size_hint: None, None
             pos_hint: {'center_x':.7, 'center_y': .35}
             on_press: root.check_status(url.text, stop_date.text)
-        Button:
-            id: btn_stop
-            text: 'Stop'
-            size_hint: None, None
-            pos_hint: {'center_x':.3, 'center_y': .35}
-            on_press: root.stop_me()
+
         Label:
             id: label_1
             text: '755 URL'

@@ -6,11 +6,10 @@ Main function
 import os
 import sys
 import time
+import asyncio
 import argparse
 from datetime import datetime
 
-import aiohttp
-import asyncio
 import requests
 
 from talk_id import get_talk_id
@@ -60,7 +59,7 @@ class Crawler(object):
             print('Visit website fail')
 
     @asyncio.coroutine
-    def run(self, client, talk_id, username, stop_time=0):
+    def run(self, talk_id, username, stop_time=0):
         page_limit = 100
 
         img_count = 1
@@ -72,7 +71,7 @@ class Crawler(object):
             payload = {
                 'direction': 'NEXT',
                 'limit': page_limit,
-                'postId': post_rec,  # test 6000 (photos and videos)
+                'postId': post_rec,
                 'talkId': talk_id,
             }
             post_rec += 100
@@ -84,7 +83,6 @@ class Crawler(object):
                 return
             else:
                 raw_data = r.json()
-
                 # handle no post
                 if not raw_data['posts']:
                     print('Finished !')
@@ -140,6 +138,7 @@ class Crawler(object):
 
                         self.download_file(
                             url, "{}_{}.mp4".format(file_date, video_count), dest_video_path)
+        return
 
 
 if __name__ == '__main__':
@@ -162,8 +161,8 @@ if __name__ == '__main__':
         talk_id, username = get_talk_id(args.url)
 
         loop = asyncio.get_event_loop()
-        with aiohttp.ClientSession(loop=loop) as client:
-            loop.run_until_complete(my_cwawler.run(
-                client, talk_id, username, args.stop_time))
+        task = asyncio.async(my_cwawler.run(
+            talk_id, username, args.stop_time))
+        loop.run_until_complete(task)
     else:
         parser.print_help()

@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import time
 
-import aiohttp
 import asyncio
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
@@ -24,9 +23,9 @@ class CrawlerWidget(BoxLayout):
                 talk_id, username = get_talk_id(url)
 
                 loop = asyncio.get_event_loop()
-                with aiohttp.ClientSession(loop=loop) as client:
-                    loop.run_until_complete(my_cwawler.run(
-                        client, talk_id, username, stop_date))
+                task = asyncio.async(my_cwawler.run(
+                    talk_id, username, stop_date))
+                loop.run_until_complete(task)
             except ValueError:
                 print('Error: Stop time format')
 

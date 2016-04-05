@@ -8,7 +8,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.core.window import Window
 
 from crawler import Crawler
-from talk_id import get_talk_id
+# from talk_id import get_talk_id
 
 
 class CrawlerWidget(BoxLayout):
@@ -19,12 +19,12 @@ class CrawlerWidget(BoxLayout):
         if url and stop_date:
             try:
                 stop_date = time.mktime(time.strptime(stop_date, "%y%m%d"))
-                my_cwawler = Crawler()
-                talk_id, username = get_talk_id(url)
+                talk_id = url.split('/')[-1]
+                my_cwawler = Crawler(talk_id)
+                # talk_id, username = get_talk_id(url)
 
                 loop = asyncio.get_event_loop()
-                task = asyncio.async(my_cwawler.run(
-                    talk_id, username, stop_date))
+                task = asyncio.async(my_cwawler.run(stop_date))
                 loop.run_until_complete(task)
             except ValueError:
                 print('Error: Stop time format')

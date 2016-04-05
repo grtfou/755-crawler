@@ -12,19 +12,21 @@ from datetime import datetime
 
 import requests
 
-from talk_id import get_talk_id
+# from talk_id import get_talk_id   # unuse
 
 
 class Crawler(object):
     """
     Crawler for download 755 photos.
     """
-    url = 'http://7gogo.jp/api/talk/post/list'
     img_path = 'images'
     video_path = 'videos'
 
-    def __init__(self):
+    def __init__(self, talk_id):
         self.session = requests.session()
+        self.talk_id = talk_id
+        # old url: http://7gogo.jp/api/talk/post/list
+        self.url = 'https://api.7gogo.jp/web/v2/talks/{}/posts'.format(talk_id)
         pass
 
     def download_file(self, url, filename, dest_path):
@@ -59,7 +61,7 @@ class Crawler(object):
             print('Visit website fail')
 
     @asyncio.coroutine
-    def run(self, talk_id, username, stop_time=0):
+    def run(self, stop_time=0):
         page_limit = 100
 
         img_count = 1
@@ -69,10 +71,9 @@ class Crawler(object):
         post_rec = 1
         while True:
             payload = {
-                'direction': 'NEXT',
+                'direction': 'NEXT',   # NEXT, PREV
                 'limit': page_limit,
-                'postId': post_rec,
-                'talkId': talk_id,
+                'targetId': post_rec,
             }
             post_rec += 100
 
@@ -83,16 +84,18 @@ class Crawler(object):
                 return
             else:
                 raw_data = r.json()
+                content = raw_data['data']
+
                 # handle no post
-                if not raw_data['posts']:
+                if not content:
                     print('Finished !')
                     return
 
                 # Created directories for store files
                 dest_img_path = 'downloads{}{}{}{}'.format(
-                    os.sep, username, os.sep, self.img_path)
+                    os.sep, self.talk_id, os.sep, self.img_path)
                 dest_video_path = 'downloads{}{}{}{}'.format(
-                    os.sep, username, os.sep, self.video_path)
+                    os.sep, self.talk_id, os.sep, self.video_path)
                 if not os.path.isdir(dest_img_path):
                     os.makedirs(dest_img_path)
                 if not os.path.isdir(dest_video_path):
@@ -101,7 +104,7 @@ class Crawler(object):
                 for i in range(page_limit):
                     # handle one page doesn't have 100 posts
                     try:
-                        post_time = int(raw_data['posts'][i]['time'])
+                        post_time = int(content[i]['post']['time'])
                     except IndexError:
                         print('Finished !')
                         return
@@ -110,8 +113,8 @@ class Crawler(object):
                     if int(post_time) < stop_time:
                         break
 
-                    url = raw_data['posts'][i]['body'][0].get('image', '')
-                    if url:
+                    url = content[i]['post']['body'][0].get('image', '')
+                    if url and url.startswith("http"):
                         # file_date = url.split('/')[4]
                         file_date = datetime.utcfromtimestamp(post_time
                                                               ).strftime("%y%m%d%H%M%S")
@@ -125,8 +128,8 @@ class Crawler(object):
                         self.download_file(
                             url, "{}_{}.jpg".format(file_date, img_count), dest_img_path)
 
-                    url = raw_data['posts'][i]['body'][0].get('movieUrlHq', '')
-                    if url:
+                    url = content[i]['post']['body'][0].get('movieUrlHq', '')
+                    if url and url.startswith("http"):
                         file_date = datetime.utcfromtimestamp(post_time
                                                               ).strftime("%y%m%d%H%M%S")
                         # handle duplication file
@@ -157,12 +160,12 @@ if __name__ == '__main__':
             print('Error: Stop Date format is wrong')
             sys.exit()
 
-        my_cwawler = Crawler()
-        talk_id, username = get_talk_id(args.url)
+        talk_id = args.url.split('/')[-1]
+        my_cwawler = Crawler(talk_id)
+        # talk_id, username = get_talk_id(args.url)
 
         loop = asyncio.get_event_loop()
-        task = asyncio.async(my_cwawler.run(
-            talk_id, username, args.stop_time))
+        task = asyncio.async(my_cwawler.run(args.stop_time))
         loop.run_until_complete(task)
     else:
         parser.print_help()

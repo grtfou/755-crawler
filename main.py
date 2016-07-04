@@ -12,9 +12,9 @@ from crawler import Crawler
 
 
 class CrawlerWidget(BoxLayout):
-    def check_status(self, url, stop_date):
+    def check_status(self, url, stop_date=160704):
         print('URL is: {txt}'.format(txt=url))
-        print('Stop Date is: {txt}'.format(txt=stop_date))
+        # print('Stop Date is: {txt}'.format(txt=stop_date))
 
         if url and stop_date:
             try:

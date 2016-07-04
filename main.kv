@@ -11,7 +11,8 @@
             text: 'Start'
             size_hint: None, None
             pos_hint: {'center_x':.7, 'center_y': .35}
-            on_press: root.check_status(url.text, stop_date.text)
+            on_press: root.check_status(url.text)
+            # on_press: root.check_status(url.text, stop_date.text)
 
         Label:
             id: label_1
@@ -31,10 +32,10 @@
             size_hint: .35, .05
             pos_hint: {'center_x':.45, 'center_y': .8}
             font_size: min(self.height, self.width) / 2
-        TextInput:
-            id: stop_date
-            text: '141011'
-            multiline: False
-            size_hint: .25, .05
-            pos_hint: {'center_x':.40, 'center_y': .6}
-            font_size: min(self.height, self.width) / 2
+        # TextInput:
+            # id: stop_date
+            # text: '141011'
+            # multiline: False
+            # size_hint: .25, .05
+            # pos_hint: {'center_x':.40, 'center_y': .6}
+            # font_size: min(self.height, self.width) / 2

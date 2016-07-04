@@ -1,7 +1,7 @@
 # 755-Crawler
 A web crawler that visit [755 website][1] for download photo and video.
 
-Last Modified: 2016.04.05
+Last Modified: 2016.07.04
 
 ## Requirements
 * Python >= 3.4
@@ -12,10 +12,10 @@ Last Modified: 2016.04.05
 Download the source code and uncompress
 ```
 $ pip install -r requirements.txt
-$ python crawler.py [url] [stop time (yy/mm/dd)]
+$ python crawler.py [url]
 
 # for example
-$ python crawler.py  https://7gogo.jp/hori-miona 160303
+$ python crawler.py  https://7gogo.jp/hori-miona
 ```
 #### [GUI]
 Please install [Kivy][2] in your platform.

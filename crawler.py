@@ -110,8 +110,8 @@ class Crawler(object):
                         return
 
                     # if msg time too old, stop download
-                    if int(post_time) < stop_time:
-                        break
+                    # if int(post_time) < stop_time:
+                    #     break
 
                     url = content[i]['post']['body'][0].get('image', '')
                     if url and url.startswith("http"):

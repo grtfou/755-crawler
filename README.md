@@ -22,7 +22,7 @@ Please install [Kivy][2] in your platform.
 
 You could see **requirements_gui.txt** to check Kivy libraries.
 
-## Licence
+## License
 MIT License
 
 [1]: http://7gogo.jp "755"

@@ -14,10 +14,12 @@ $ git clone https://github.com/grtfou/755-crawler.git
 $ cd 755-crawler
 $ pip install -r requirements.txt
 
-$ python crawler.py [url]
+$ python crawler.py <url> <start_download_post_date>
 # ex.
+# Default only download today
 $   python crawler.py https://7gogo.jp/hori-miona
-$   python crawler.py https://7gogo.jp/kuranoo-narumi
+# Download if the post after 181101
+$   python crawler.py https://7gogo.jp/kuranoo-narumi 181101
 ```
 #### [GUI]
 It use [Kivy][2]. Please refer to Kivy's documentation.

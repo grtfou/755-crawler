@@ -1,3 +1,0 @@
-Kivy==1.9.0
-Kivy-Garden==0.1.1
-requests==2.9.0

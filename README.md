@@ -15,17 +15,16 @@ $ cd 755-crawler
 $ pip install -r requirements.txt
 
 $ python crawler.py <url> <start_download_post_date>
+
 # ex.
-# Default only download today
-$   python crawler.py https://7gogo.jp/hori-miona
-# Download if the post after 181101
-$   python crawler.py https://7gogo.jp/kuranoo-narumi 181101
+# 1. Default only download today
+$ python crawler.py https://7gogo.jp/hori-miona
+
+# 2. Download if the post after 181101
+$ python crawler.py https://7gogo.jp/kuranoo-narumi 181101
 ```
-#### [GUI]
-It use [Kivy][2]. Please refer to Kivy's documentation.
 
 ## License
 MIT License
 
 [1]: http://7gogo.jp "755"
-[2]: http://kivy.org "kivy"

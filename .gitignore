@@ -57,6 +57,11 @@ docs/_build/
 # PyBuilder
 target/
 
-# configure
-local_settings.py
+# OS file
+.DS_Store
+.DS_Store?
+.Trashes
+Thumbs.db
+
+# for 755-Crawler project
 downloads/

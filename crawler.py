@@ -64,6 +64,23 @@ class Crawler(object):
         else:
             print('Visit website fail')
 
+    def __get_latest_post_id(self):
+        payload = {
+            'limit': 1,
+        }
+
+        r = self.session.get(self.url, params=payload)
+        if r.status_code != 200:
+            # handle connection fail
+            print('\x1b[0;30;43mSet post id is 1.\x1b[0m')
+            return 1
+        else:
+            try:
+                latest_post_id = r.json()['data'][0]["post"]["postId"]
+                return latest_post_id
+            except (IndexError, KeyError):
+                return 1
+
     def __parse(self, raw_post, post_time):
         # Image
         raw_body = raw_post.get('body', [])
@@ -90,16 +107,50 @@ class Crawler(object):
                     self.dest_video_path)
 
     async def run(self, start_time=0):
-        page_limit = 100
+        # headers = {
+        #     'User-Agent': ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6)'
+        #                    ' AppleWebKit/537.36 (KHTML, like Gecko) '
+        #                    'Chrome/70.0.3538.110 Safari/537.36'),
+        #     'Referer': self.url,
+        #     'X-Requested-With': 'XMLHttpRequest',
+        #     # 'X-7gogo-WebAuth': ''
+        # }
 
-        post_rec = 1
+        page_limit = 100
+        payload = {
+            'limit': page_limit,
+        }
+
+        # try to get latest post id
+        post_rec = self.__get_latest_post_id()
+        if post_rec <= 1:  # fail
+            payload['direction'] = 'NEXT'
+            payload['targetId'] = 1
+        else:
+            payload['direction'] = 'PREV'
+            payload['targetId'] = post_rec
+        # -
+
         while True:
-            payload = {
-                'direction': 'NEXT',   # NEXT, PREV
-                'limit': page_limit,
-                'targetId': post_rec,
-            }
-            post_rec += 100
+            """
+            1. Only targetId: get latest post (100 post).
+
+            2. PREV:
+                 if maximum post targetId is 13949,
+                 set targetId <= 14058 (14058-13949=109) will get latest data.
+                 set targetId >  14059 will no data
+            """
+
+            payload['targetId'] = post_rec
+            if payload['direction'] == 'NEXT':
+                post_rec += 100
+            else:
+                if post_rec > 100:
+                    post_rec -= 100
+                else:
+                    break
+
+            # for PREV
 
             r = self.session.get(self.url, params=payload)
             if r.status_code != 200:
@@ -130,8 +181,11 @@ class Crawler(object):
 
                     # if msg time too old, skip it.
                     if int(post_time) < start_time:
-                        print('.', end='', flush=True)
-                        continue
+                        if payload['direction'] == 'NEXT':
+                            print('.', end='', flush=True)
+                            continue
+                        else:
+                            break
 
                     # This post was deleted
                     if owner is None:  # or use 'postType' == 100

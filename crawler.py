@@ -64,12 +64,12 @@ class Crawler(object):
         else:
             print('Visit website fail')
 
-    def __get_latest_post_id(self):
+    def __get_latest_post_id(self, http_headers):
         payload = {
             'limit': 1,
         }
 
-        r = self.session.get(self.url, params=payload)
+        r = self.session.get(self.url, headers=http_headers, params=payload)
         if r.status_code != 200:
             # handle connection fail
             print('\x1b[0;30;43mSet post id is 1.\x1b[0m')
@@ -107,14 +107,22 @@ class Crawler(object):
                     self.dest_video_path)
 
     async def run(self, start_time=0):
-        # headers = {
-        #     'User-Agent': ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6)'
-        #                    ' AppleWebKit/537.36 (KHTML, like Gecko) '
-        #                    'Chrome/70.0.3538.110 Safari/537.36'),
-        #     'Referer': self.url,
-        #     'X-Requested-With': 'XMLHttpRequest',
-        #     # 'X-7gogo-WebAuth': ''
-        # }
+        headers = {
+            'Host': 'api.7gogo.jp',
+            'Origin': 'https://7gogo.jp',
+            'Accept': "*/*",
+            'Accept-Language': 'zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'Pragma': 'no-cache',
+            'User-Agent': ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6)'
+                           ' AppleWebKit/537.36 (KHTML, like Gecko) '
+                           'Chrome/70.0.3538.110 Safari/537.36'),
+            'Referer': self.url,
+            'X-Requested-With': 'XMLHttpRequest',
+            # 'X-7gogo-WebAuth': ''
+        }
 
         page_limit = 100
         payload = {
@@ -122,7 +130,7 @@ class Crawler(object):
         }
 
         # try to get latest post id
-        post_rec = self.__get_latest_post_id()
+        post_rec = self.__get_latest_post_id(headers)
         if post_rec <= 1:  # fail
             payload['direction'] = 'NEXT'
             payload['targetId'] = 1
@@ -131,6 +139,7 @@ class Crawler(object):
             payload['targetId'] = post_rec
         # -
 
+        IS_END = False
         while True:
             """
             1. Only targetId: get latest post (100 post).
@@ -152,7 +161,7 @@ class Crawler(object):
 
             # for PREV
 
-            r = self.session.get(self.url, params=payload)
+            r = self.session.get(self.url, headers=headers, params=payload)
             if r.status_code != 200:
                 # handle connection fail
                 print('\x1b[0;30;43mError: Connection fail. '
@@ -173,10 +182,11 @@ class Crawler(object):
                         post_time = int(post['time'])
                         owner = post['owner']
                     except IndexError:
-                        print('Finished !')
+                        IS_END = True
                         break
                     except KeyError:
                         print('Website API was changed !')
+                        IS_END = True
                         break
 
                     # if msg time too old, skip it.
@@ -185,6 +195,7 @@ class Crawler(object):
                             print('.', end='', flush=True)
                             continue
                         else:
+                            IS_END = True
                             break
 
                     # This post was deleted
@@ -192,6 +203,10 @@ class Crawler(object):
                         continue
 
                     self.__parse(post, post_time)
+
+                if IS_END:
+                    print('Finished !')
+                    break
 
 
 if __name__ == '__main__':

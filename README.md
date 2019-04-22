@@ -5,7 +5,7 @@ Last Modified: 2018.11.29
 
 ## Requirements
 * Python >= 3.6, 3.7
-* requests >= 2.20.1
+* requests >= 2.21
 
 ## How to Use
 #### [Run by source code]

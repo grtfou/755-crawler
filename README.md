@@ -4,7 +4,7 @@ A web crawler that visit [755 website][1] for download photo and video.
 Last Modified: 2018.11.29
 
 ## Requirements
-* Python >= 3.6, 3.7
+* Python >= 3.6
 * requests >= 2.21
 
 ## How to Use
